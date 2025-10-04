@@ -1,0 +1,1142 @@
+openapi: 3.0.3
+info:
+  title: Secretarium API
+  version: 1.0.0
+  description: |
+    REST API powering Secretarium. CRUD endpoints manage workspaces and multiple
+    secret types. Sensitive fields are masked everywhere except copy endpoints
+    which return the plaintext value once.
+servers:
+  - url: http://localhost:4000/api/v1
+paths:
+  /workspaces:
+    get:
+      summary: List workspaces
+      parameters:
+        - $ref: '#/components/parameters/PageParam'
+        - $ref: '#/components/parameters/LimitParam'
+        - $ref: '#/components/parameters/SortParam'
+        - $ref: '#/components/parameters/SearchParam'
+      responses:
+        '200':
+          $ref: '#/components/responses/WorkspaceCollection'
+    post:
+      summary: Create workspace
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WorkspaceCreate'
+      responses:
+        '201':
+          $ref: '#/components/responses/WorkspaceItem'
+  /workspaces/{id}:
+    get:
+      summary: Get workspace by id
+      parameters:
+        - $ref: '#/components/parameters/IdParam'
+      responses:
+        '200':
+          $ref: '#/components/responses/WorkspaceItem'
+    put:
+      summary: Update workspace
+      parameters:
+        - $ref: '#/components/parameters/IdParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WorkspaceUpdate'
+      responses:
+        '200':
+          $ref: '#/components/responses/WorkspaceItem'
+    delete:
+      summary: Delete workspace
+      parameters:
+        - $ref: '#/components/parameters/IdParam'
+      responses:
+        '204':
+          description: Deleted
+  /secrets:
+    get:
+      summary: List application secrets
+      parameters:
+        - $ref: '#/components/parameters/PageParam'
+        - $ref: '#/components/parameters/LimitParam'
+        - $ref: '#/components/parameters/SortParam'
+        - $ref: '#/components/parameters/SearchParam'
+        - $ref: '#/components/parameters/WorkspaceFilter'
+        - $ref: '#/components/parameters/TagsFilter'
+      responses:
+        '200':
+          $ref: '#/components/responses/SecretCollection'
+    post:
+      summary: Create a secret
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SecretCreate'
+      responses:
+        '201':
+          $ref: '#/components/responses/SecretItem'
+  /secrets/{id}:
+    get:
+      summary: Get secret (masked)
+      parameters:
+        - $ref: '#/components/parameters/IdParam'
+      responses:
+        '200':
+          $ref: '#/components/responses/SecretItem'
+    put:
+      summary: Update secret
+      parameters:
+        - $ref: '#/components/parameters/IdParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SecretUpdate'
+      responses:
+        '200':
+          $ref: '#/components/responses/SecretItem'
+    delete:
+      summary: Delete secret
+      parameters:
+        - $ref: '#/components/parameters/IdParam'
+      responses:
+        '204':
+          description: Deleted
+  /secrets/{id}/secret/password/copy:
+    post:
+      summary: Copy the password for a secret
+      parameters:
+        - $ref: '#/components/parameters/IdParam'
+      responses:
+        '200':
+          $ref: '#/components/responses/CopyValue'
+  /api-keys:
+    get:
+      summary: List API keys
+      parameters:
+        - $ref: '#/components/parameters/PageParam'
+        - $ref: '#/components/parameters/LimitParam'
+        - $ref: '#/components/parameters/SortParam'
+        - $ref: '#/components/parameters/SearchParam'
+        - $ref: '#/components/parameters/WorkspaceFilter'
+        - $ref: '#/components/parameters/TagsFilter'
+      responses:
+        '200':
+          $ref: '#/components/responses/ApiKeyCollection'
+    post:
+      summary: Create API key record
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApiKeyCreate'
+      responses:
+        '201':
+          $ref: '#/components/responses/ApiKeyItem'
+  /api-keys/{id}:
+    get:
+      summary: Get API key (masked)
+      parameters:
+        - $ref: '#/components/parameters/IdParam'
+      responses:
+        '200':
+          $ref: '#/components/responses/ApiKeyItem'
+    put:
+      summary: Update API key
+      parameters:
+        - $ref: '#/components/parameters/IdParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApiKeyUpdate'
+      responses:
+        '200':
+          $ref: '#/components/responses/ApiKeyItem'
+    delete:
+      summary: Delete API key
+      parameters:
+        - $ref: '#/components/parameters/IdParam'
+      responses:
+        '204':
+          description: Deleted
+  /api-keys/{id}/secret/apiKey/copy:
+    post:
+      summary: Copy API key value
+      parameters:
+        - $ref: '#/components/parameters/IdParam'
+      responses:
+        '200':
+          $ref: '#/components/responses/CopyValue'
+  /ssh-keys:
+    get:
+      summary: List SSH keys
+      parameters:
+        - $ref: '#/components/parameters/PageParam'
+        - $ref: '#/components/parameters/LimitParam'
+        - $ref: '#/components/parameters/SortParam'
+        - $ref: '#/components/parameters/SearchParam'
+        - $ref: '#/components/parameters/WorkspaceFilter'
+        - $ref: '#/components/parameters/TagsFilter'
+      responses:
+        '200':
+          $ref: '#/components/responses/SshKeyCollection'
+    post:
+      summary: Create SSH key record
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SshKeyCreate'
+      responses:
+        '201':
+          $ref: '#/components/responses/SshKeyItem'
+  /ssh-keys/{id}:
+    get:
+      summary: Get SSH key (masked)
+      parameters:
+        - $ref: '#/components/parameters/IdParam'
+      responses:
+        '200':
+          $ref: '#/components/responses/SshKeyItem'
+    put:
+      summary: Update SSH key
+      parameters:
+        - $ref: '#/components/parameters/IdParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SshKeyUpdate'
+      responses:
+        '200':
+          $ref: '#/components/responses/SshKeyItem'
+    delete:
+      summary: Delete SSH key
+      parameters:
+        - $ref: '#/components/parameters/IdParam'
+      responses:
+        '204':
+          description: Deleted
+  /ssh-keys/{id}/secret/privateKey/copy:
+    post:
+      summary: Copy SSH private key
+      parameters:
+        - $ref: '#/components/parameters/IdParam'
+      responses:
+        '200':
+          $ref: '#/components/responses/CopyValue'
+  /bank-cards:
+    get:
+      summary: List bank cards
+      parameters:
+        - $ref: '#/components/parameters/PageParam'
+        - $ref: '#/components/parameters/LimitParam'
+        - $ref: '#/components/parameters/SortParam'
+        - $ref: '#/components/parameters/SearchParam'
+        - $ref: '#/components/parameters/WorkspaceFilter'
+        - $ref: '#/components/parameters/TagsFilter'
+      responses:
+        '200':
+          $ref: '#/components/responses/BankCardCollection'
+    post:
+      summary: Create bank card record
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BankCardCreate'
+      responses:
+        '201':
+          $ref: '#/components/responses/BankCardItem'
+  /bank-cards/{id}:
+    get:
+      summary: Get bank card (masked)
+      parameters:
+        - $ref: '#/components/parameters/IdParam'
+      responses:
+        '200':
+          $ref: '#/components/responses/BankCardItem'
+    put:
+      summary: Update bank card
+      parameters:
+        - $ref: '#/components/parameters/IdParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BankCardUpdate'
+      responses:
+        '200':
+          $ref: '#/components/responses/BankCardItem'
+    delete:
+      summary: Delete bank card
+      parameters:
+        - $ref: '#/components/parameters/IdParam'
+      responses:
+        '204':
+          description: Deleted
+  /bank-cards/{id}/secret/cardNumber/copy:
+    post:
+      summary: Copy card number
+      parameters:
+        - $ref: '#/components/parameters/IdParam'
+      responses:
+        '200':
+          $ref: '#/components/responses/CopyValue'
+  /bank-cards/{id}/secret/cvv/copy:
+    post:
+      summary: Copy CVV
+      parameters:
+        - $ref: '#/components/parameters/IdParam'
+      responses:
+        '200':
+          $ref: '#/components/responses/CopyValue'
+  /bank-accounts:
+    get:
+      summary: List bank accounts
+      parameters:
+        - $ref: '#/components/parameters/PageParam'
+        - $ref: '#/components/parameters/LimitParam'
+        - $ref: '#/components/parameters/SortParam'
+        - $ref: '#/components/parameters/SearchParam'
+        - $ref: '#/components/parameters/WorkspaceFilter'
+        - $ref: '#/components/parameters/TagsFilter'
+      responses:
+        '200':
+          $ref: '#/components/responses/BankAccountCollection'
+    post:
+      summary: Create bank account record
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BankAccountCreate'
+      responses:
+        '201':
+          $ref: '#/components/responses/BankAccountItem'
+  /bank-accounts/{id}:
+    get:
+      summary: Get bank account (masked)
+      parameters:
+        - $ref: '#/components/parameters/IdParam'
+      responses:
+        '200':
+          $ref: '#/components/responses/BankAccountItem'
+    put:
+      summary: Update bank account
+      parameters:
+        - $ref: '#/components/parameters/IdParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BankAccountUpdate'
+      responses:
+        '200':
+          $ref: '#/components/responses/BankAccountItem'
+    delete:
+      summary: Delete bank account
+      parameters:
+        - $ref: '#/components/parameters/IdParam'
+      responses:
+        '204':
+          description: Deleted
+  /bank-accounts/{id}/secret/accountNumber/copy:
+    post:
+      summary: Copy account number
+      parameters:
+        - $ref: '#/components/parameters/IdParam'
+      responses:
+        '200':
+          $ref: '#/components/responses/CopyValue'
+  /uploads:
+    post:
+      summary: Upload an icon file
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+      responses:
+        '201':
+          description: File uploaded
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: object
+                    properties:
+                      url:
+                        type: string
+components:
+  parameters:
+    IdParam:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: string
+    PageParam:
+      name: page
+      in: query
+      required: false
+      schema:
+        type: integer
+        minimum: 1
+    LimitParam:
+      name: limit
+      in: query
+      required: false
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 100
+    SortParam:
+      name: sort
+      in: query
+      required: false
+      schema:
+        type: string
+        example: -updatedAt,name
+    SearchParam:
+      name: q
+      in: query
+      required: false
+      schema:
+        type: string
+    WorkspaceFilter:
+      name: workspaceId
+      in: query
+      required: false
+      schema:
+        type: string
+    TagsFilter:
+      name: tags
+      in: query
+      required: false
+      schema:
+        type: string
+        example: deploy,prod
+  responses:
+    WorkspaceCollection:
+      description: Workspace collection
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/WorkspaceCollectionResponse'
+    WorkspaceItem:
+      description: Workspace item
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/WorkspaceItemResponse'
+    SecretCollection:
+      description: Secret collection
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/SecretCollectionResponse'
+    SecretItem:
+      description: Secret item
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/SecretItemResponse'
+    ApiKeyCollection:
+      description: API key collection
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiKeyCollectionResponse'
+    ApiKeyItem:
+      description: API key item
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiKeyItemResponse'
+    SshKeyCollection:
+      description: SSH key collection
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/SshKeyCollectionResponse'
+    SshKeyItem:
+      description: SSH key item
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/SshKeyItemResponse'
+    BankCardCollection:
+      description: Bank card collection
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/BankCardCollectionResponse'
+    BankCardItem:
+      description: Bank card item
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/BankCardItemResponse'
+    BankAccountCollection:
+      description: Bank account collection
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/BankAccountCollectionResponse'
+    BankAccountItem:
+      description: Bank account item
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/BankAccountItemResponse'
+    CopyValue:
+      description: Plaintext response for copy endpoints
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/CopyValueResponse'
+  schemas:
+    ResponseMeta:
+      type: object
+      properties:
+        total:
+          type: integer
+        page:
+          type: integer
+        limit:
+          type: integer
+        totalPages:
+          type: integer
+        hasMore:
+          type: boolean
+    Workspace:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+    WorkspaceCreate:
+      type: object
+      required:
+        - name
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+    WorkspaceUpdate:
+      type: object
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+    WorkspaceCollectionResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Workspace'
+        meta:
+          $ref: '#/components/schemas/ResponseMeta'
+    WorkspaceItemResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          $ref: '#/components/schemas/Workspace'
+    Secret:
+      type: object
+      properties:
+        id:
+          type: string
+        workspaceId:
+          type: string
+        name:
+          type: string
+        username:
+          type: string
+        password:
+          type: string
+          description: Masked value
+        otpMethod:
+          type: string
+          enum: [TOTP, SMS, Email, NONE]
+        url:
+          type: string
+        notes:
+          type: string
+        iconUrl:
+          type: string
+        tags:
+          type: array
+          items:
+            type: string
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+    SecretCreate:
+      type: object
+      required:
+        - workspaceId
+        - name
+        - username
+        - password
+        - otpMethod
+      properties:
+        workspaceId:
+          type: string
+        name:
+          type: string
+        username:
+          type: string
+        password:
+          type: string
+        otpMethod:
+          type: string
+          enum: [TOTP, SMS, Email, NONE]
+        url:
+          type: string
+        notes:
+          type: string
+        iconUrl:
+          type: string
+        tags:
+          type: array
+          items:
+            type: string
+    SecretUpdate:
+      type: object
+      properties:
+        workspaceId:
+          type: string
+        name:
+          type: string
+        username:
+          type: string
+        password:
+          type: string
+        otpMethod:
+          type: string
+          enum: [TOTP, SMS, Email, NONE]
+        url:
+          type: string
+        notes:
+          type: string
+        iconUrl:
+          type: string
+        tags:
+          type: array
+          items:
+            type: string
+    SecretCollectionResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Secret'
+        meta:
+          $ref: '#/components/schemas/ResponseMeta'
+    SecretItemResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          $ref: '#/components/schemas/Secret'
+    ApiKey:
+      type: object
+      properties:
+        id:
+          type: string
+        workspaceId:
+          type: string
+        name:
+          type: string
+        provider:
+          type: string
+        apiKey:
+          type: string
+          description: Masked value
+        baseUrl:
+          type: string
+        scopes:
+          type: array
+          items:
+            type: string
+        environment:
+          type: string
+          enum: [dev, stage, prod]
+        notes:
+          type: string
+        iconUrl:
+          type: string
+        tags:
+          type: array
+          items:
+            type: string
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+    ApiKeyCreate:
+      type: object
+      required:
+        - workspaceId
+        - name
+        - provider
+        - apiKey
+        - environment
+      properties:
+        workspaceId:
+          type: string
+        name:
+          type: string
+        provider:
+          type: string
+        apiKey:
+          type: string
+        baseUrl:
+          type: string
+        scopes:
+          type: array
+          items:
+            type: string
+        environment:
+          type: string
+          enum: [dev, stage, prod]
+        notes:
+          type: string
+        iconUrl:
+          type: string
+        tags:
+          type: array
+          items:
+            type: string
+    ApiKeyUpdate:
+      type: object
+      properties:
+        workspaceId:
+          type: string
+        name:
+          type: string
+        provider:
+          type: string
+        apiKey:
+          type: string
+        baseUrl:
+          type: string
+        scopes:
+          type: array
+          items:
+            type: string
+        environment:
+          type: string
+          enum: [dev, stage, prod]
+        notes:
+          type: string
+        iconUrl:
+          type: string
+        tags:
+          type: array
+          items:
+            type: string
+    ApiKeyCollectionResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/ApiKey'
+        meta:
+          $ref: '#/components/schemas/ResponseMeta'
+    ApiKeyItemResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          $ref: '#/components/schemas/ApiKey'
+    SshKey:
+      type: object
+      properties:
+        id:
+          type: string
+        workspaceId:
+          type: string
+        name:
+          type: string
+        publicKey:
+          type: string
+        privateKey:
+          type: string
+          description: Masked value
+        comment:
+          type: string
+        notes:
+          type: string
+        iconUrl:
+          type: string
+        tags:
+          type: array
+          items:
+            type: string
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+    SshKeyCreate:
+      type: object
+      required:
+        - workspaceId
+        - name
+        - publicKey
+        - privateKey
+      properties:
+        workspaceId:
+          type: string
+        name:
+          type: string
+        publicKey:
+          type: string
+        privateKey:
+          type: string
+        comment:
+          type: string
+        notes:
+          type: string
+        iconUrl:
+          type: string
+        tags:
+          type: array
+          items:
+            type: string
+    SshKeyUpdate:
+      type: object
+      properties:
+        workspaceId:
+          type: string
+        name:
+          type: string
+        publicKey:
+          type: string
+        privateKey:
+          type: string
+        comment:
+          type: string
+        notes:
+          type: string
+        iconUrl:
+          type: string
+        tags:
+          type: array
+          items:
+            type: string
+    SshKeyCollectionResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/SshKey'
+        meta:
+          $ref: '#/components/schemas/ResponseMeta'
+    SshKeyItemResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          $ref: '#/components/schemas/SshKey'
+    BankCard:
+      type: object
+      properties:
+        id:
+          type: string
+        workspaceId:
+          type: string
+        cardholderName:
+          type: string
+        brand:
+          type: string
+        cardNumber:
+          type: string
+          description: Masked value
+        expiryMonth:
+          type: integer
+        expiryYear:
+          type: integer
+        cvv:
+          type: string
+          description: Masked value
+        billingAddress:
+          type: string
+        notes:
+          type: string
+        iconUrl:
+          type: string
+        tags:
+          type: array
+          items:
+            type: string
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+    BankCardCreate:
+      type: object
+      required:
+        - workspaceId
+        - cardholderName
+        - brand
+        - cardNumber
+        - expiryMonth
+        - expiryYear
+        - cvv
+      properties:
+        workspaceId:
+          type: string
+        cardholderName:
+          type: string
+        brand:
+          type: string
+        cardNumber:
+          type: string
+        expiryMonth:
+          type: integer
+        expiryYear:
+          type: integer
+        cvv:
+          type: string
+        billingAddress:
+          type: string
+        notes:
+          type: string
+        iconUrl:
+          type: string
+        tags:
+          type: array
+          items:
+            type: string
+    BankCardUpdate:
+      type: object
+      properties:
+        workspaceId:
+          type: string
+        cardholderName:
+          type: string
+        brand:
+          type: string
+        cardNumber:
+          type: string
+        expiryMonth:
+          type: integer
+        expiryYear:
+          type: integer
+        cvv:
+          type: string
+        billingAddress:
+          type: string
+        notes:
+          type: string
+        iconUrl:
+          type: string
+        tags:
+          type: array
+          items:
+            type: string
+    BankCardCollectionResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/BankCard'
+        meta:
+          $ref: '#/components/schemas/ResponseMeta'
+    BankCardItemResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          $ref: '#/components/schemas/BankCard'
+    BankAccount:
+      type: object
+      properties:
+        id:
+          type: string
+        workspaceId:
+          type: string
+        bankName:
+          type: string
+        accountHolder:
+          type: string
+        accountNumber:
+          type: string
+          description: Masked value
+        iban:
+          type: string
+        swiftBic:
+          type: string
+        routingNumber:
+          type: string
+        currency:
+          type: string
+        notes:
+          type: string
+        iconUrl:
+          type: string
+        tags:
+          type: array
+          items:
+            type: string
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+    BankAccountCreate:
+      type: object
+      required:
+        - workspaceId
+        - bankName
+        - accountHolder
+        - accountNumber
+      properties:
+        workspaceId:
+          type: string
+        bankName:
+          type: string
+        accountHolder:
+          type: string
+        accountNumber:
+          type: string
+        iban:
+          type: string
+        swiftBic:
+          type: string
+        routingNumber:
+          type: string
+        currency:
+          type: string
+        notes:
+          type: string
+        iconUrl:
+          type: string
+        tags:
+          type: array
+          items:
+            type: string
+    BankAccountUpdate:
+      type: object
+      properties:
+        workspaceId:
+          type: string
+        bankName:
+          type: string
+        accountHolder:
+          type: string
+        accountNumber:
+          type: string
+        iban:
+          type: string
+        swiftBic:
+          type: string
+        routingNumber:
+          type: string
+        currency:
+          type: string
+        notes:
+          type: string
+        iconUrl:
+          type: string
+        tags:
+          type: array
+          items:
+            type: string
+    BankAccountCollectionResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/BankAccount'
+        meta:
+          $ref: '#/components/schemas/ResponseMeta'
+    BankAccountItemResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          $ref: '#/components/schemas/BankAccount'
+    CopyValueResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        value:
+          type: string
