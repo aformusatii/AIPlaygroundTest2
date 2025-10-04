@@ -11,7 +11,7 @@ export const baseMetadataSchema = z.object({
 
 export const workspaceScopedMetadataSchema = baseMetadataSchema.extend({
   workspaceId: z.string().min(1),
-  iconUrl: z.string().url().optional().or(z.literal('')),
+  iconUrl: z.string().optional(),
   tags: z.array(z.string()).default([]),
 });
 
@@ -26,7 +26,7 @@ export const secretCoreSchema = z.object({
   url: z.string().url().optional().or(z.literal('')),
   notes: z.string().optional().or(z.literal('')),
   tags: z.array(z.string()).optional(),
-  iconUrl: z.string().url().optional().or(z.literal('')),
+  iconUrl: z.string().optional(),
 });
 
 export const apiKeyEnvironment = ['dev', 'stage', 'prod'] as const;
@@ -40,7 +40,7 @@ export const apiKeyCoreSchema = z.object({
   environment: z.enum(apiKeyEnvironment),
   notes: z.string().optional().or(z.literal('')),
   tags: z.array(z.string()).optional(),
-  iconUrl: z.string().url().optional().or(z.literal('')),
+  iconUrl: z.string().optional(),
 });
 
 export const sshKeyCoreSchema = z.object({
@@ -50,7 +50,7 @@ export const sshKeyCoreSchema = z.object({
   comment: z.string().optional().or(z.literal('')),
   notes: z.string().optional().or(z.literal('')),
   tags: z.array(z.string()).optional(),
-  iconUrl: z.string().url().optional().or(z.literal('')),
+  iconUrl: z.string().optional(),
 });
 
 export const bankCardCoreSchema = z.object({
@@ -63,7 +63,7 @@ export const bankCardCoreSchema = z.object({
   billingAddress: z.string().optional().or(z.literal('')),
   notes: z.string().optional().or(z.literal('')),
   tags: z.array(z.string()).optional(),
-  iconUrl: z.string().url().optional().or(z.literal('')),
+  iconUrl: z.string().optional(),
 });
 
 export const bankAccountCoreSchema = z.object({
@@ -76,7 +76,7 @@ export const bankAccountCoreSchema = z.object({
   currency: z.string().optional().or(z.literal('')),
   notes: z.string().optional().or(z.literal('')),
   tags: z.array(z.string()).optional(),
-  iconUrl: z.string().url().optional().or(z.literal('')),
+  iconUrl: z.string().optional(),
 });
 
 export const workspaceCoreSchema = z.object({
@@ -132,7 +132,7 @@ export const workspaceUpdateSchema = workspaceCoreSchema.partial().refine((data)
 export const listQuerySchema = z
   .object({
     page: z.coerce.number().int().min(1).optional().default(1),
-    limit: z.coerce.number().int().min(1).max(100).optional().default(25),
+    limit: z.coerce.number().int().min(1).max(10000).optional().default(25),
     sort: z.string().optional(),
     q: z.string().optional(),
     workspaceId: z.string().optional(),

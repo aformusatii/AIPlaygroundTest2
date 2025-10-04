@@ -19,8 +19,8 @@ interface CreateResourceRouterOptions<T, CreateInput, UpdateInput> {
 
 export const createResourceRouter = <
   T extends { id: string; createdAt: string; updatedAt: string },
-  CreateInput,
-  UpdateInput,
+  CreateInput extends Record<string, unknown>,
+  UpdateInput extends Record<string, unknown>,
 >(service: BaseService<T, CreateInput, UpdateInput>, options: CreateResourceRouterOptions<T, CreateInput, UpdateInput>) => {
   const router = Router();
 

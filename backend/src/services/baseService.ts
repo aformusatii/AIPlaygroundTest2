@@ -1,4 +1,4 @@
-import type { Level } from 'level';
+import type { AbstractLevel } from 'abstract-level';
 import { nanoid } from 'nanoid';
 import {
   type ListParams,
@@ -8,21 +8,32 @@ import {
 import { MASK_PLACEHOLDER, maskSensitiveFields } from '../utils/mask.js';
 import { badRequest, notFound } from '../utils/errors.js';
 
+type EntityKey<T> = Extract<keyof T, string>;
+
+type KeyValueStore<TValue> = Pick<
+  AbstractLevel<any, string, TValue>,
+  'get' | 'put' | 'del' | 'iterator'
+>;
+
 export interface ResourceOptions<T extends { id: string }> {
   resourceName: string;
-  searchableFields: (keyof T)[];
-  sensitiveFields: (keyof T)[];
-  workspaceField?: keyof T;
+  searchableFields: EntityKey<T>[];
+  sensitiveFields: EntityKey<T>[];
+  workspaceField?: EntityKey<T>;
   defaultSort?: string;
 }
 
 interface SortDescriptor<T> {
-  field: keyof T;
+  field: EntityKey<T>;
   direction: SortDirection;
 }
 
-export class BaseService<T extends { id: string; createdAt: string; updatedAt: string }, CreateInput, UpdateInput> {
-  constructor(private readonly store: Level<string, T>, private readonly options: ResourceOptions<T>) {}
+export class BaseService<
+  T extends { id: string; createdAt: string; updatedAt: string },
+  CreateInput extends Record<string, unknown>,
+  UpdateInput extends Record<string, unknown>,
+> {
+  constructor(private readonly store: KeyValueStore<T>, private readonly options: ResourceOptions<T>) {}
 
   protected parseSort(sort?: string): SortDescriptor<T>[] {
     const fallback = this.options.defaultSort ?? '-updatedAt';
@@ -30,7 +41,7 @@ export class BaseService<T extends { id: string; createdAt: string; updatedAt: s
     return raw.split(',').map((segment) => {
       const trimmed = segment.trim();
       const direction: SortDirection = trimmed.startsWith('-') ? 'desc' : 'asc';
-      const field = (trimmed.replace(/^[-+]/, '') || 'updatedAt') as keyof T;
+      const field = (trimmed.replace(/^[-+]/, '') || 'updatedAt') as EntityKey<T>;
       return { field, direction };
     });
   }
@@ -72,8 +83,9 @@ export class BaseService<T extends { id: string; createdAt: string; updatedAt: s
   }
 
   protected applyWorkspaceFilter(items: T[], workspaceId?: string): T[] {
-    if (!this.options.workspaceField || !workspaceId) return items;
-    return items.filter((item) => String(item[this.options.workspaceField!]) === workspaceId);
+    const workspaceField = this.options.workspaceField;
+    if (!workspaceField || !workspaceId) return items;
+    return items.filter((item) => String(item[workspaceField]) === workspaceId);
   }
 
   protected applyTagFilter(items: T[], tags?: string[]): T[] {
@@ -104,13 +116,14 @@ export class BaseService<T extends { id: string; createdAt: string; updatedAt: s
   }
 
   protected prepareForReturn(item: T): T {
-    return maskSensitiveFields(item, this.options.sensitiveFields as string[]);
+    return maskSensitiveFields(item, this.options.sensitiveFields);
   }
 
-  protected normalizeInput(input: Partial<CreateInput & UpdateInput>): Partial<CreateInput & UpdateInput> {
+  protected normalizeInput<TInput extends Record<string, unknown>>(input: TInput): TInput {
     const normalized = { ...input };
-    if ('tags' in normalized && !normalized.tags) {
-      (normalized as Record<string, unknown>).tags = [];
+    const normalizedRecord = normalized as Record<string, unknown>;
+    if ('tags' in normalizedRecord && (normalizedRecord.tags === undefined || normalizedRecord.tags === null)) {
+      normalizedRecord.tags = [];
     }
     return normalized;
   }
@@ -159,31 +172,34 @@ export class BaseService<T extends { id: string; createdAt: string; updatedAt: s
   }
 
   async create(payload: CreateInput): Promise<T> {
-    const normalized = this.normalizeInput(payload) as CreateInput;
-    if (this.options.workspaceField && !(normalized as Record<string, unknown>)[this.options.workspaceField]) {
+    const normalized = this.normalizeInput(payload);
+    const normalizedRecord = normalized as Record<string, unknown>;
+    const workspaceField = this.options.workspaceField;
+    if (workspaceField && !normalizedRecord[workspaceField]) {
       throw badRequest('workspaceId is required');
     }
     const now = new Date().toISOString();
     const base: Record<string, unknown> = {
-      ...(normalized as Record<string, unknown>),
+      ...normalizedRecord,
       id: nanoid(),
       createdAt: now,
       updatedAt: now,
     };
-    const entity = this.buildEntity(base, normalized as Record<string, unknown>) as T;
+    const entity = this.buildEntity(base, normalizedRecord) as T;
     await this.store.put(entity.id, entity);
     return this.prepareForReturn(entity);
   }
 
   async update(id: string, payload: UpdateInput): Promise<T> {
     const existing = await this.getRawById(id);
-    const normalized = this.normalizeInput(payload) as UpdateInput;
+    const normalized = this.normalizeInput(payload);
+    const normalizedRecord = normalized as Record<string, unknown>;
     const base: Record<string, unknown> = {
       ...existing,
-      ...(normalized as Record<string, unknown>),
+      ...normalizedRecord,
       updatedAt: new Date().toISOString(),
     };
-    const entity = this.buildEntity(base, normalized as Record<string, unknown>) as T;
+    const entity = this.buildEntity(base, normalizedRecord) as T;
     await this.store.put(id, entity);
     return this.prepareForReturn(entity);
   }
