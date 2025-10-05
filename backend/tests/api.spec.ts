@@ -67,6 +67,37 @@ describe('Secretarium API', () => {
     expect(response.body.data[0].apiKey).toBe('******');
   });
 
+  it('creates a bank card and exposes only the last four digits', async () => {
+    const createResponse = await request(app)
+      .post('/api/v1/bank-cards')
+      .send({
+        workspaceId,
+        cardholderName: 'Test Cardholder',
+        brand: 'Visa',
+        cardNumber: '4111111111114242',
+        expiryMonth: 12,
+        expiryYear: 2030,
+        cvv: '123',
+        billingAddress: '123 Test Street',
+        notes: 'Automated test card',
+        tags: ['test'],
+      });
+
+    expect(createResponse.status).toBe(201);
+    expect(createResponse.body.data.cardNumber).toBe('**** 4242');
+    expect(createResponse.body.data.cvv).toBe('******');
+
+    const listResponse = await request(app)
+      .get('/api/v1/bank-cards')
+      .query({ workspaceId });
+
+    expect(listResponse.status).toBe(200);
+    const card = listResponse.body.data.find((item: any) => item.cardholderName === 'Test Cardholder');
+    expect(card).toBeDefined();
+    expect(card.cardNumber).toBe('**** 4242');
+    expect(card.cvv).toBe('******');
+  });
+
   it('copies sensitive fields via copy endpoint', async () => {
     const listResponse = await request(app).get('/api/v1/secrets').query({ workspaceId });
     const secret = listResponse.body.data.find((item: any) => item.name === 'Test Admin');

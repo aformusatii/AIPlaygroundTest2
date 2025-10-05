@@ -5,7 +5,7 @@ import {
   type ListResult,
   type SortDirection,
 } from '../types/entities.js';
-import { MASK_PLACEHOLDER, maskSensitiveFields } from '../utils/mask.js';
+import { MASK_PLACEHOLDER, maskSensitiveFields, type SensitiveFieldDescriptor } from '../utils/mask.js';
 import { badRequest, notFound } from '../utils/errors.js';
 
 type EntityKey<T> = Extract<keyof T, string>;
@@ -18,7 +18,7 @@ type KeyValueStore<TValue> = Pick<
 export interface ResourceOptions<T extends { id: string }> {
   resourceName: string;
   searchableFields: EntityKey<T>[];
-  sensitiveFields: EntityKey<T>[];
+  sensitiveFields: SensitiveFieldDescriptor<T>[];
   workspaceField?: EntityKey<T>;
   defaultSort?: string;
 }
