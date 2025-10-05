@@ -12,7 +12,7 @@ app.use(pinia);
 app.use(router);
 app.mount('#app');
 
-if ('serviceWorker' in navigator) {
+if (import.meta.env.PROD && 'serviceWorker' in navigator) {
   const wb = new Workbox('/service-worker.js');
   wb.register().catch((error) => {
     console.error('Failed to register service worker', error);
